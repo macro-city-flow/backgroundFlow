@@ -39,4 +39,4 @@ tensorboard --logdir [LOG DIR PATH]
 
 ## batch running
 
-<!-- Not impled yet -->
+<!-- Not implied yet -->

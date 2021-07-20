@@ -17,10 +17,6 @@ class GRU(nn.Module):
         self._fr = fr
         self._tanh = nn.Tanh()
         self._sigmoid = nn.Sigmoid()
-        # self._W_z = nn.Parameter(torch.FloatTensor(
-        #     self._hidden_dim, self._input_dim))
-        # self._U_z = nn.Parameter(torch.FloatTensor(
-        #     self._hidden_dim, self._hidden_dim))
         self._W_z1 = nn.Parameter(torch.FloatTensor(
             1, self._input_dim))
         self._U_z1 = nn.Parameter(torch.FloatTensor(

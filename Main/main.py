@@ -28,6 +28,8 @@ def get_model(args, dm):
         model = models.TGCN(adj=dm.adj,feature_dim=args.output_dim,input_dim = args.output_dim,hidden_dim=args.hidden_dim,output_dim=args.output_dim,fr=args.gamma)
     if args.model_name == 'MDN':
         model = models.MDN(input_dim=args.output_dim,output_dim=args.output_dim,feature_dim=args.output_dim,gamma=args.gamma)
+    if args.model_name == 'GRU_MDN':
+        model = models.GRU_MDN(input_dim=args.output_dim,output_dim=args.output_dim,feature_dim=args.output_dim,gamma=args.gamma)
     return model
 
 
@@ -81,10 +83,10 @@ if __name__ == '__main__':
     parser.add_argument('--data', type=str, help='The name of the dataset',
                         choices=('chengdu'), default='chengdu')
     parser.add_argument('--model-name', type=str, help='The name of the model for spatiotemporal prediction',
-                        choices=('GCN', 'GRU', 'ChebyNet','TGCN','MDN'), default='GCN')
+                        default='GCN')
     parser.add_argument('--settings', type=str, help='The type of tasks, e.g. forecast task',
                         choices=('forecast', 'densityForecast'), default='forecast')
-    parser.add_argument('--data-module', type=str, help='Determine if data has sequntial feature',
+    parser.add_argument('--data-module', type=str, help='Determine if data has sequential feature',
                         choices=('NS', 'S'), default='NS')
     # parser.add_argument('--tensorboard-path',type=str,default='./lightning_logs/')
 

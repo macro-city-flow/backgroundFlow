@@ -28,6 +28,7 @@ class densityForecastTask(pl.LightningModule):
     def loss(self,mu,sigma,weights, targets):
         
         mixture_density = torch.distributions.Normal(loc = mu,scale = sigma)
+        
         loss = torch.exp(mixture_density.log_prob(targets))
         loss = torch.sum(loss*weights,dim = 0)
         loss = - torch.log(loss)
@@ -36,6 +37,8 @@ class densityForecastTask(pl.LightningModule):
 
 
     def training_step(self, batch, batch_idx):
+        
+        
         mu,sigma,weights, y = self.shared_step(batch, batch_idx)
         loss = self.loss(mu,sigma,weights, y)
         self.log('train_loss',loss)
@@ -43,7 +46,14 @@ class densityForecastTask(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         mu,sigma,weights, y = self.shared_step(batch, batch_idx)
+        
         loss = self.loss(mu,sigma,weights,y)
+        mixture_density = torch.distributions.Normal(loc = mu,scale = sigma)
+        
+        prob = torch.exp(mixture_density.log_prob(y))
+        _ = torch.multinomial(weights,prob.shape[0]*prob.shape[1]*prob.shape[2],replacement=True)
+        #TODO multinomial only support 2-dimension so here needs modification
+        
         metrics = {
             'val_loss': loss
         }

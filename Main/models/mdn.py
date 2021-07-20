@@ -33,15 +33,9 @@ class MDN(nn.Module):
 
     def forward(self, inputs):
         
-        
-
         mu = self._activate(self._mu_weights @ inputs + self._mu_bias)
         sigma = self._activate(self._sigma_weights @ inputs + self._sigma_bias)
         weights = self._regularize(self._distri_weights)
-        
-        #What I should do to handle downflow?
-        #Maybe use log
-        #TODO calculate probability
 
         return mu,sigma,weights
 
@@ -58,5 +52,5 @@ class MDN(nn.Module):
     @property
     def hyperparameters(self):
         return {
-
+            #TODO add learning rate
         }
