@@ -1,4 +1,3 @@
-# TODO add GPU support
 import argparse
 from utils.callbacks import SendMessageCallback
 import pytorch_lightning as pl
@@ -88,11 +87,7 @@ if __name__ == '__main__':
                         choices=('forecast', 'densityForecast'), default='forecast')
     parser.add_argument('--data-module', type=str, help='Determine if data has sequential feature',
                         choices=('NS', 'S'), default='NS')
-    # parser.add_argument('--tensorboard-path',type=str,default='./lightning_logs/')
 
-    # TODO: I'm doubting if the settings is meanful, maybe I should remove it.
-    # TODO: I may code more task for different forcast, Not all tasks supports time units.
-    # TODO: lightning log
     temp_args, _ = parser.parse_known_args()
 
     parser = getattr(utils.data, temp_args.data_module +

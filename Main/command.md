@@ -36,6 +36,11 @@ python3 main.py --data chengdu --model-name ChebyNet --settings forecast --data-
 ```bash
 tensorboard --logdir [LOG DIR PATH]
 ```
+Example:
+```bash
+tensorboard --logdir ./lightning_logs/GCN
+```
+
 
 ## batch running
 
