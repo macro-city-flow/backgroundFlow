@@ -1,9 +1,14 @@
 import torch
+import numpy as np
+from torch import Tensor
 
-def sample(distributions:torch.distributions.Normal,weights:torch.Tensor,times:int)->list:
-    assert(len(distributions.loc.shape) <=2)#no support for over 2-dimension data
-    result = []
+def sample(mu:Tensor,sigma:Tensor,weights:Tensor,times:int)->Tensor:
+
+    assert(mu.shape ==sigma.shape == weights.shape)
+    assert(len(weights.shape) <=2)#no support for over 2-dimension data
+    result = torch.FloatTensor(times,mu.shape[0],mu.shape[1])
     for _ in range(times):
-        sample = None#Not implied yet
-        result.append(sample)
+        k = torch.multinomial(weights,number_samples=1,replacement=True)
+        result[_] = torch.normal(mu,sigma)[np.arange(mu.shape[0]),k].data
+    
     return  result

@@ -1,3 +1,5 @@
+# commands
+
 ## configuration
 
 ```bash
@@ -25,8 +27,8 @@ python3 main.py --data chengdu --model-name MDN --settings densityForecast --dat
 ```bash
 python3 main.py --data chengdu --model-name GRU_MDN --settings densityForecast --data-module NS --lr 0.0000114514 --weight-decay 1.5e-3 --batch-size 1 --seq-len 1 --pre-len 1 --split-ratio 0.8 --normalize --gamma 5 --output-dim 25 --gradient-clip-val 5 --gpus 1
 ```
-Learning rate here must be lower or it will easily gradient exploded.
 
+Learning rate here must be lower or it will easily gradient exploded.
 
 ### Test needed
 
@@ -34,18 +36,14 @@ Learning rate here must be lower or it will easily gradient exploded.
 python3 main.py --data chengdu --model-name ChebyNet --settings forecast --data-module NS --lr 0.00114514 --weight-decay 1.5e-3 --loss mse --batch-size 1 --seq-len 1 --pre-len 1 --split-ratio 0.8 --normalize --hidden-dim 64 --output-dim 25 --gpus 1
 ```
 
-
 ## monitor metrics
 
 ```bash
 tensorboard --logdir [LOG DIR PATH]
 ```
+
 Example:
+
 ```bash
 tensorboard --logdir ./lightning_logs/GCN
 ```
-
-
-## batch running
-
-<!-- Not implied yet -->
