@@ -1,11 +1,5 @@
 # commands
 
-## configuration
-
-```bash
-conda activate torch
-```
-
 ## basic running
 
 ```bash
