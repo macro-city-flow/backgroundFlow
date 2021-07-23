@@ -37,23 +37,25 @@ class densityForecastTask(pl.LightningModule):
 
 
     def training_step(self, batch, batch_idx):
-        
-        
+                
         mu,sigma,weights, y = self.shared_step(batch, batch_idx)
         loss = self.loss(mu,sigma,weights, y)
         self.log('train_loss',loss)
         return loss
 
     def validation_step(self, batch, batch_idx):
+
         mu,sigma,weights, y = self.shared_step(batch, batch_idx)
         
         loss = self.loss(mu,sigma,weights,y)
         mixture_density = torch.distributions.Normal(loc = mu,scale = sigma)
         
         prob = torch.exp(mixture_density.log_prob(y))
-        _ = torch.multinomial(weights,prob.shape[0]*prob.shape[1]*prob.shape[2],replacement=True)
+        sample = torch.FloatTensor(y.shape)
+
         #TODO multinomial only support 2-dimension so here needs modification
-        
+        #TODO I need to realize sampling for loss calculation
+        #TODO I need to realize confidence interval as a metric        
         metrics = {
             'val_loss': loss
         }
@@ -82,8 +84,3 @@ class densityForecastTask(pl.LightningModule):
             'learning_rate':self._learning_rate,
             'weight_decay':self._weight_decay
         }
-
-
-
-#TODO figure out how to use the parameters to get loss and how to validate that it's useful
-

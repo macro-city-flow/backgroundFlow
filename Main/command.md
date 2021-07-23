@@ -22,6 +22,10 @@ python3 main.py --data chengdu --model-name TGCN --settings forecast --data-modu
 python3 main.py --data chengdu --model-name MDN --settings densityForecast --data-module NS --lr 0.00114514 --weight-decay 1.5e-3 --batch-size 1 --seq-len 1 --pre-len 1 --split-ratio 0.8 --normalize --gamma 5 --output-dim 25 --gradient-clip-val 30 --gpus 1
 ```
 
+```bash
+python3 main.py --data chengdu --model-name GRU_MDN --settings densityForecast --data-module NS --lr 0.0000114514 --weight-decay 1.5e-3 --batch-size 1 --seq-len 1 --pre-len 1 --split-ratio 0.8 --normalize --gamma 5 --output-dim 25 --gradient-clip-val 5 --gpus 1
+```
+Learning rate here must be lower or it will easily gradient exploded.
 
 
 ### Test needed

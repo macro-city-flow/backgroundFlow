@@ -24,7 +24,6 @@ class forecastTask(pl.LightningModule):
         self._is_sequential = True if data_module == 'S' else False
         self._y_transfer = nn.Sigmoid()
         self._mean_absolute_error = MeanAbsoluteError()
-        #TODO maybe a hyper parameter for it
         
     def forward(self, x):
         outputs=self._model(x)

@@ -1,4 +1,4 @@
-# not realized yet
+# MDN layer which can give a set of parameter of Gaussain mixture distribution
 
 import argparse
 import torch.nn as nn
@@ -52,5 +52,7 @@ class MDN(nn.Module):
     @property
     def hyperparameters(self):
         return {
-            #TODO add learning rate
+            "input_dimension":self._input_dim,
+            "output_dimension":self._output_dim,
+            "gamma":self._gamma
         }
