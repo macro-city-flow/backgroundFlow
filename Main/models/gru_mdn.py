@@ -1,5 +1,6 @@
-import argparse
+#GRU_MDN currently no specific name for this model,but it shows potential in giving prediction of distributions of origin-destination 
 
+import argparse
 import torch
 import torch.nn as nn
 from models import GRU,MDN

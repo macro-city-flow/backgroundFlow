@@ -1,5 +1,5 @@
 # GCN-2
-
+#TODO This model is not test yet so potential bug might exists
 import argparse
 from torch import functional
 import torch.nn as nn
