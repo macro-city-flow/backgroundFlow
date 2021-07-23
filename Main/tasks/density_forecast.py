@@ -48,16 +48,21 @@ class densityForecastTask(pl.LightningModule):
         mu,sigma,weights, y = self.shared_step(batch, batch_idx)
         
         loss = self.loss(mu,sigma,weights,y)
-        mixture_density = torch.distributions.Normal(loc = mu,scale = sigma)
-        
-        prob = torch.exp(mixture_density.log_prob(y))
         sample = torch.FloatTensor(y.shape)
-
+        #Assume only 4 dimension
+        for _ in range(sample.shape[0]):
+            for __ in range(sample.shape[1]):
+                mixture_density = torch.distributions.Normal(loc= mu.transpose(2,3).transpose(1,3)[_][__],scale=sigma.transpose(2,3).tranpose(1,3)[_][__])
+                
         #TODO multinomial only support 2-dimension so here needs modification
         #TODO I need to realize sampling for loss calculation
         #TODO I need to realize confidence interval as a metric        
         metrics = {
-            'val_loss': loss
+            'val_loss': loss,
+            'RMSE':None,
+            'MSE':None,
+            'MAE':None,
+            'Accuracy':None
         }
         self.log_dict(metrics)
         return mu,sigma,weights,y
