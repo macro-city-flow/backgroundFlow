@@ -21,7 +21,6 @@ class MDN(nn.Module):
         self._regularize = nn.Softmax(dim = 0)
         self._activate = nn.Sigmoid()
         
-        #TODO I can addd submodule here
         self.reset_parameters()
 
     def reset_parameters(self):
