@@ -3,7 +3,8 @@ import torch.optim
 import torch.nn as nn
 import torch.nn.functional as F
 import pytorch_lightning as pl
-import utils.metrics
+from utils.metrics import accuracy
+import utils.probability as prob
 import utils.losses
 import torch.distributions
 
@@ -46,21 +47,23 @@ class densityForecastTask(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
 
         mu,sigma,weights, y = self.shared_step(batch, batch_idx)
-        
+        mu,sigma,weights,y =mu.squeeze(),sigma.squeeze(),weights.squeeze(),y.squeeze()
+
         loss = self.loss(mu,sigma,weights,y)
         sample = torch.FloatTensor(y.shape)
-        #Assume only 4 dimension
-                
-        #TODO multinomial only support 2-dimension so here needs modification
-        #TODO I need to realize sampling for loss calculation
-        #TODO I need to realize confidence interval as a metric        
+        for _ in range(sample.shape[0]):
+            sample[_] = prob.sample(mu[_],sigma[_],weights[_],y[_],1)
+        mse = F.mse_loss(sample,y)
+        rmse = torch.sqrt(mse)
+        acc = accuracy(sample,y)
+        
         metrics = {
             'val_loss': loss,
-            'RMSE':None,
-            'MSE':None,
-            'MAE':None,
-            'Accuracy':None
+            'RMSE':rmse,
+            'MSE':mse,
+            'Accuracy':acc
         }
+
         self.log_dict(metrics)
         return mu,sigma,weights,y
 

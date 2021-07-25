@@ -1,5 +1,4 @@
 import argparse
-from torch.autograd import backward
 import torch.optim
 import torch.nn as nn
 import torch.nn.functional as F
