@@ -19,6 +19,7 @@ class densityForecastTask(pl.LightningModule):
         self._feature_dim = feature_dim
         self._model = model
         self._MAE = MeanAbsoluteError()
+        self._transfer = nn.Sigmoid()
 
     def sample(self,mu: Tensor, sigma: Tensor, weights: Tensor, times: int) -> Tensor:
 
@@ -63,7 +64,7 @@ class densityForecastTask(pl.LightningModule):
     def shared_step(self, batch, batch_idx):
         x, y = batch
         mu, sigma, weights = self(x)
-        return mu, sigma, weights, y
+        return mu, sigma, weights, self._transfer(y)
 
     def loss(self, mu, sigma, weights, targets):
 

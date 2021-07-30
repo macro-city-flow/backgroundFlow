@@ -41,5 +41,6 @@ class GRU_MDN(nn.Module):
     @property
     def hyperparameters(self):
         return {
-            #TODO add learning rate
+            'gamma':self._gamma,
+            
         }

@@ -31,7 +31,7 @@ class forecastTask(pl.LightningModule):
     def shared_step(self, batch, batch_idx):
         x, y = batch
         predictions = self(x)
-        #y = self._y_transfer(y)
+        y = self._y_transfer(y)
         return predictions, y
     
     def loss(self, inputs, targets):
@@ -53,13 +53,11 @@ class forecastTask(pl.LightningModule):
         loss = self.loss(predictions, y)
         rmse = torch.sqrt(loss) 
         mae = torch.sum(self._mean_absolute_error(predictions,y))
-        accuracy = utils.metrics.multiFeatureAccuracy(predictions, y)
         var = sum([torch.var(predictions[i]-y[i]) for i in range(len(predictions))])/len(predictions)
         metrics = {
             'val_loss': loss,
             'RMSE': rmse,
             'MAE': mae,
-            'accuracy': accuracy,
             'variance':var
         }
         self.log_dict(metrics)
