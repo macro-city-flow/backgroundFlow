@@ -4,6 +4,7 @@
 2. The model can be very easy in such a large scale
 3. Consider add more hidden state for it
 4. MDN can't convergent without recurrent unit
+5. In old metrics GRU_MDN performed well.
 
 New metrics:Relative Confidence Interval (RCI)
 New metrics:Relative Mean Confidence Interval (RMCI)

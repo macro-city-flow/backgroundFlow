@@ -22,8 +22,10 @@ class densityForecastTask(pl.LightningModule):
 
     def sample(self,mu: Tensor, sigma: Tensor, weights: Tensor, times: int) -> Tensor:
 
-        assert(mu.shape == sigma.shape == weights.shape)
-        assert(len(weights.shape) <= 2)  # no support for over 2-dimension data
+        # DEBUG
+        # assert(mu.shape == sigma.shape == weights.shape)
+        # assert(len(weights.shape) <= 2)  # no support for over 2-dimension data
+        
         result = torch.FloatTensor(times, mu.shape[0])
         result = result.cuda()
         for _ in range(times):
@@ -34,17 +36,21 @@ class densityForecastTask(pl.LightningModule):
         return result
 
 
-    def RMCI(self,mu:Tensor,sigma:Tensor,weights:torch.Tensor,y)-> Tensor:
+    def RMCI(self,mu:Tensor,sigma:Tensor,weights:torch.Tensor,y:Tensor)-> Tensor:
         
         confidence_level = 0.90#F**k.... I have no idea whether this can be used this way
         #And this can be replaced with hyperparameters 
 
-        assert(mu.shape == sigma.shape)
-        assert(mu.shape[0]== y.shape[0])
-        assert(len(mu.shape) <=2)#no support for over 2-dimension data
+        # DEBUG
+        # assert(mu.shape == sigma.shape)
+        # assert(mu.shape[0]== y.shape[0])
+        # assert(len(mu.shape) <=2)#no support for over 2-dimension data
         
         samples = self.sample(mu,sigma,weights,20).transpose(0,1)#20 is a number that can be further replaced with hyperparameters
-        result = [[abs(_-y[__]) for _ in samples[__]].sort() for __ in range(samples.shape[0]) ]
+        result = [[abs(_-y[__]) for _ in samples[__]] for __ in range(samples.shape[0]) ]
+        for _ in result:
+            _.sort()
+
         result = [result[_][int(confidence_level*20)] for _ in range(len(result))]
         result = sum(result)/len(result)
 
@@ -91,12 +97,15 @@ class densityForecastTask(pl.LightningModule):
         mse = F.mse_loss(sample, y)
         rmse = torch.sqrt(mse)
         mae = self._MAE(sample, y)
+        rmci =[self.RMCI(mu[_],sigma[_],weights[_],y[_]) for _ in range(mu.shape[0])]
+        rmci = sum(rmci)/len(rmci)
         #TODO add relative interval for this
         metrics = {
             'val_loss': loss,
             'RMSE': rmse,
             'MSE': mse,
-            'MAE': mae
+            'MAE': mae,
+            'RMCI':rmci
         }
 
         self.log_dict(metrics)

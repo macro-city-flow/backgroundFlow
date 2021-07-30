@@ -31,7 +31,7 @@ class forecastTask(pl.LightningModule):
     def shared_step(self, batch, batch_idx):
         x, y = batch
         predictions = self(x)
-        y = self._y_transfer(y)
+        #y = self._y_transfer(y)
         return predictions, y
     
     def loss(self, inputs, targets):
