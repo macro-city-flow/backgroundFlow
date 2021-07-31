@@ -4,7 +4,6 @@ from torch import Tensor
 import torch.nn as nn
 import torch.nn.functional as F
 import pytorch_lightning as pl
-from utils.metrics import accuracy
 from torchmetrics.regression.mean_absolute_error import MeanAbsoluteError
 import torch.distributions
 import numpy as np

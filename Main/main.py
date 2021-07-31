@@ -29,6 +29,8 @@ def get_model(args, dm):
         model = models.MDN(input_dim=args.output_dim,output_dim=args.output_dim,feature_dim=args.output_dim,gamma=args.gamma)
     if args.model_name == 'GRU_MDN':
         model = models.GRU_MDN(input_dim=args.output_dim,output_dim=args.output_dim,feature_dim=args.output_dim,gamma=args.gamma)
+    if args.model_name == 'GRU_MDN2':
+        model = models.GRU_MDN2(input_dim=args.output_dim,output_dim=args.output_dim,feature_dim=args.output_dim,gamma=args.gamma)
     return model
 
 
