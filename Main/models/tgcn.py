@@ -7,16 +7,16 @@ from models import GRU
 
 # fr : forget rate that control how many information forget in a step.
 class TGCN(nn.Module):
-    def __init__(self,adj, feature_dim: int, input_dim: int, hidden_dim: int, output_dim: int, fr: float, **kwargs):
+    def __init__(self,adj_path, feature_dim: int, input_dim: int, hidden_dim: int, output_dim: int, fr: float, **kwargs):
         super(TGCN, self).__init__()
-        self._adj = adj
+        self._adj_path = adj_path
         self._feature_dim = feature_dim
         self._input_dim = input_dim
         self._hidden_dim = hidden_dim
         self._output_dim = output_dim
         assert(0 <= fr <= 1)
         self._fr = fr
-        self._gcn_layer = GCN(self._adj,self._feature_dim,self._input_dim,self._hidden_dim,self._hidden_dim)
+        self._gcn_layer = GCN(self._adj_path,self._feature_dim,self._input_dim,self._hidden_dim,self._hidden_dim)
         self._gru_layer = GRU(self._feature_dim,self._input_dim,self._hidden_dim,self._output_dim,fr=self._fr)
         self.reset_parameters()
 

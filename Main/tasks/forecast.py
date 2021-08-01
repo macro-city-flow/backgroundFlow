@@ -20,7 +20,6 @@ class forecastTask(pl.LightningModule):
         self._weight_decay = weight_decay
         self._feat_max_val = feat_max_val
         self._is_sequential = True if data_module == 'S' else False
-        self._y_transfer = nn.Sigmoid()
         self._mean_absolute_error = MeanAbsoluteError()
         
     def forward(self, x):
@@ -30,7 +29,7 @@ class forecastTask(pl.LightningModule):
     def shared_step(self, batch, batch_idx):
         x, y = batch
         predictions = self(x)
-        y = self._y_transfer(y)
+        #y = self._y_transfer(y)
         return predictions, y
     
     def loss(self, inputs, targets):

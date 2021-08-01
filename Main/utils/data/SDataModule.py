@@ -6,11 +6,11 @@ import utils.data.functions
 
 #Sequential
 class SDataModule(pl.LightningDataModule):
-    def __init__(self, feat_path: str, adj_path: str,
+    def __init__(self, data_path: str, adj_path: str,
                  seq_len: int = 4, pre_len: int = 1,
                  split_ratio: float = 0.8, normalize: bool = True, **kwargs):
         super(SDataModule, self).__init__()
-        self._feat_path = feat_path
+        self._feat_path = data_path
         self._adj_path = adj_path
         self.seq_len = seq_len
         self.pre_len = pre_len
@@ -28,7 +28,8 @@ class SDataModule(pl.LightningDataModule):
         parser.add_argument('--seq-len', type=int, default=1)
         parser.add_argument('--pre-len', type=int, default=1)
         parser.add_argument('--split-ratio', type=float, default=0.8)
-        #parser.add_argument('--normalize', type=bool, default=True)
+        parser.add_argument('--adj-path',type=str)
+        parser.add_argument('--data-path',type=str)
         normlize_parser = parser.add_mutually_exclusive_group(required=True)
         normlize_parser.add_argument('--normalize',dest='normalize',action='store_true')
         normlize_parser.add_argument('--no-normalize',dest='normalize',action='store_false')

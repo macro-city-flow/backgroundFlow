@@ -44,7 +44,7 @@ class MDN(nn.Module):
             parents=[parent_parser], add_help=False)
         parser.add_argument('--gamma',type=int,default=5)
         parser.add_argument('--input-dim',type=int)
-        parser.add_argument('--output-dim',type=int)
+        parser.add_argument('--output-dim',type=int)   
         parser.add_argument('--gradient-clip-val',type=float,default=5)    
         return parser
 

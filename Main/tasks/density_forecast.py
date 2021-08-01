@@ -18,7 +18,7 @@ class densityForecastTask(pl.LightningModule):
         self._feature_dim = feature_dim
         self._model = model
         self._MAE = MeanAbsoluteError()
-        self._transfer = nn.Sigmoid()
+    
 
     def sample(self,mu: Tensor, sigma: Tensor, weights: Tensor, times: int) -> Tensor:
 
@@ -27,7 +27,8 @@ class densityForecastTask(pl.LightningModule):
         # assert(len(weights.shape) <= 2)  # no support for over 2-dimension data
         
         result = torch.FloatTensor(times, mu.shape[0])
-        result = result.cuda()
+        if self.on_gpu():
+            result = result.cuda()
         for _ in range(times):
             k = torch.multinomial(weights, num_samples=1, replacement=True).squeeze()
             
@@ -63,7 +64,7 @@ class densityForecastTask(pl.LightningModule):
     def shared_step(self, batch, batch_idx):
         x, y = batch
         mu, sigma, weights = self(x)
-        return mu, sigma, weights, self._transfer(y)
+        return mu, sigma, weights,y
 
     def loss(self, mu, sigma, weights, targets):
 
@@ -93,7 +94,8 @@ class densityForecastTask(pl.LightningModule):
         sample = torch.FloatTensor(y.shape)
         for _ in range(sample.shape[0]):
             sample[_] = self.sample(mu=mu[_],sigma= sigma[_],weights= weights[_],times= 1)
-        sample=sample.cuda()
+        if self.on_gpu():
+            sample=sample.cuda()
         mse = F.mse_loss(sample, y)
         rmse = torch.sqrt(mse)
         mae = self._MAE(sample, y)
