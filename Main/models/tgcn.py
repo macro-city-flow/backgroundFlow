@@ -32,10 +32,11 @@ class TGCN(nn.Module):
     def add_model_specific_arguments(parent_parser):
         parser = argparse.ArgumentParser(
             parents=[parent_parser], add_help=False)
-
+        parser.add_argument('--input-dim',type=int)
         parser.add_argument('--output-dim', type=int)
         parser.add_argument('--hidden-dim', type=int, default=64)
-        parser.add_argument('--gamma', type=float, default=0.5)
+        parser.add_argument('--feature-dim',type=int)
+        parser.add_argument('--fr', type=float, default=0.5)
         parser.add_argument('--gradient-clip-val',type=float,default=5)
         return parser
 

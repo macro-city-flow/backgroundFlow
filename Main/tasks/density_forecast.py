@@ -27,7 +27,7 @@ class densityForecastTask(pl.LightningModule):
         # assert(len(weights.shape) <= 2)  # no support for over 2-dimension data
         
         result = torch.FloatTensor(times, mu.shape[0])
-        if self.on_gpu():
+        if self.on_gpu:
             result = result.cuda()
         for _ in range(times):
             k = torch.multinomial(weights, num_samples=1, replacement=True).squeeze()
@@ -94,7 +94,7 @@ class densityForecastTask(pl.LightningModule):
         sample = torch.FloatTensor(y.shape)
         for _ in range(sample.shape[0]):
             sample[_] = self.sample(mu=mu[_],sigma= sigma[_],weights= weights[_],times= 1)
-        if self.on_gpu():
+        if self.on_gpu:
             sample=sample.cuda()
         mse = F.mse_loss(sample, y)
         rmse = torch.sqrt(mse)

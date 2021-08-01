@@ -6,7 +6,14 @@ import models
 import tasks
 import utils.callbacks
 import utils.data
-import utils.misc
+import logging
+
+
+def format_logger(logger, format='\033[31m[%(asctime)s %(levelname)s]\033\n[0m%(message)s'):
+    handler = logger.handlers[0]
+    formatter = logging.Formatter(format)
+    handler.setFormatter(formatter)
+
 
 def main(args):
 
@@ -57,5 +64,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    utils.misc.format_logger(pl._logger)
+    format_logger(pl._logger)
+    
     main(args)

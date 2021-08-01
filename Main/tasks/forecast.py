@@ -4,7 +4,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 import pytorch_lightning as pl
 from torchmetrics.regression.mean_absolute_error import MeanAbsoluteError
-import utils.losses
 
 class forecastTask(pl.LightningModule):
     def __init__(self, model: nn.Module, loss='mse',

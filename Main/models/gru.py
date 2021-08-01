@@ -77,7 +77,8 @@ class GRU(nn.Module):
         parser.add_argument('--input-dim',type=int)
         parser.add_argument('--output-dim', type=int)
         parser.add_argument('--hidden-dim', type=int, default=64)
-        parser.add_argument('--gamma', type=float, default=0.5)
+        parser.add_argument('--feature-dim',type=int)
+        parser.add_argument('--fr', type=float, default=0.4)
         parser.add_argument('--gradient-clip-val',type=float,default=5)
         return parser
 
