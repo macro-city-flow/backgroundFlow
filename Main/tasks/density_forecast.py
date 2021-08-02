@@ -9,6 +9,7 @@ import torch.distributions
 import numpy as np
 from torch import normal
 
+
 class densityForecastTask(pl.LightningModule):
     def __init__(self, model: nn.Module,
                  pre_len: int = 1, learning_rate: float = 1e-3, feature_dim: int = 1,
@@ -18,41 +19,44 @@ class densityForecastTask(pl.LightningModule):
         self._feature_dim = feature_dim
         self._model = model
         self._MAE = MeanAbsoluteError()
-    
 
-    def sample(self,mu: Tensor, sigma: Tensor, weights: Tensor, times: int) -> Tensor:
+    def sample(self, mu: Tensor, sigma: Tensor, weights: Tensor, times: int) -> Tensor:
 
         # DEBUG
         # assert(mu.shape == sigma.shape == weights.shape)
         # assert(len(weights.shape) <= 2)  # no support for over 2-dimension data
-        
+
         result = torch.FloatTensor(times, mu.shape[0])
         if self.on_gpu:
             result = result.cuda()
         for _ in range(times):
-            k = torch.multinomial(weights, num_samples=1, replacement=True).squeeze()
-            
-            result[_] = normal(mean=mu,std=sigma)[np.arange(mu.shape[0]), k].data
-        
+            k = torch.multinomial(weights, num_samples=1,
+                                  replacement=True).squeeze()
+
+            result[_] = normal(mean=mu, std=sigma)[
+                np.arange(mu.shape[0]), k].data
+
         return result
 
+    def RMCI(self, mu: Tensor, sigma: Tensor, weights: torch.Tensor, y: Tensor) -> Tensor:
 
-    def RMCI(self,mu:Tensor,sigma:Tensor,weights:torch.Tensor,y:Tensor)-> Tensor:
-        
-        confidence_level = 0.90#F**k.... I have no idea whether this can be used this way
-        #And this can be replaced with hyperparameters 
+        confidence_level = 0.90  # F**k.... I have no idea whether this can be used this way
+        # And this can be replaced with hyperparameters
 
         # DEBUG
         # assert(mu.shape == sigma.shape)
         # assert(mu.shape[0]== y.shape[0])
         # assert(len(mu.shape) <=2)#no support for over 2-dimension data
-        
-        samples = self.sample(mu,sigma,weights,20).transpose(0,1)#20 is a number that can be further replaced with hyperparameters
-        result = [[abs(_-y[__]) for _ in samples[__]] for __ in range(samples.shape[0]) ]
+
+        # 20 is a number that can be further replaced with hyperparameters
+        samples = self.sample(mu, sigma, weights, 20).transpose(0, 1)
+        result = [[abs(_-y[__]) for _ in samples[__]]
+                  for __ in range(samples.shape[0])]
         for _ in result:
             _.sort()
 
-        result = [result[_][int(confidence_level*20)] for _ in range(len(result))]
+        result = [result[_][int(confidence_level*20)]
+                  for _ in range(len(result))]
         result = sum(result)/len(result)
 
         return result
@@ -64,7 +68,7 @@ class densityForecastTask(pl.LightningModule):
     def shared_step(self, batch, batch_idx):
         x, y = batch
         mu, sigma, weights = self(x)
-        return mu, sigma, weights,y
+        return mu, sigma, weights, y
 
     def loss(self, mu, sigma, weights, targets):
 
@@ -93,21 +97,23 @@ class densityForecastTask(pl.LightningModule):
 
         sample = torch.FloatTensor(y.shape)
         for _ in range(sample.shape[0]):
-            sample[_] = self.sample(mu=mu[_],sigma= sigma[_],weights= weights[_],times= 1)
+            sample[_] = self.sample(
+                mu=mu[_], sigma=sigma[_], weights=weights[_], times=1)
         if self.on_gpu:
-            sample=sample.cuda()
+            sample = sample.cuda()
         mse = F.mse_loss(sample, y)
         rmse = torch.sqrt(mse)
         mae = self._MAE(sample, y)
-        rmci =[self.RMCI(mu[_],sigma[_],weights[_],y[_]) for _ in range(mu.shape[0])]
+        rmci = [self.RMCI(mu[_], sigma[_], weights[_], y[_])
+                for _ in range(mu.shape[0])]
         rmci = sum(rmci)/len(rmci)
-        #TODO add relative interval for this
+        # TODO add relative interval for this
         metrics = {
             'val_loss': loss,
             'RMSE': rmse,
             'MSE': mse,
             'MAE': mae,
-            'RMCI':rmci
+            'RMCI': rmci
         }
 
         self.log_dict(metrics)

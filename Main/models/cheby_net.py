@@ -1,5 +1,5 @@
 # GCN-2
-#TODO This model is not test yet so potential bug might exists
+# TODO This model is not test yet so potential bug might exists
 import argparse
 from torch import functional
 import torch.nn as nn
@@ -8,6 +8,8 @@ from utils.graph_conv import calculate_cheby_ploy
 from torch.nn.functional import normalize
 
 # gamma: defines the grade of neighbourhod
+
+
 class ChebyNet(nn.Module):
     def __init__(self, adj, feature_dim: int, input_dim: int, output_dim: int, hidden_dim: int, gamma: int, **kwargs):
         super(ChebyNet, self).__init__()
@@ -55,7 +57,7 @@ class ChebyNet(nn.Module):
         Lambda = sum([self._ploy_weight[_]*self._cheby_ploy[_]
                      for _ in range(self._gamma+1)])
         Lambda = normalize(Lambda)
-        
+
         outputs = inputs @ self._gc_weight + self._gc_bias
         outputs = Lambda @ outputs
         outputs = self._gc_activate(outputs)

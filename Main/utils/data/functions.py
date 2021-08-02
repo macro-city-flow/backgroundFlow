@@ -20,7 +20,7 @@ def load_adjacency_matrix(adj_path, dtype=np.float32):
     return adj
 
 
-def generate_dataset(data, seq_len, pre_len, time_len=None, split_ratio=0.8, normalize=True,sequential=False):
+def generate_dataset(data, seq_len, pre_len, time_len=None, split_ratio=0.8, normalize=True, sequential=False):
 
     raw = []
 
@@ -33,7 +33,7 @@ def generate_dataset(data, seq_len, pre_len, time_len=None, split_ratio=0.8, nor
     size = len(data)-pre_len-seq_len
     for _ in range(size):
         raw.append(data[_:_+pre_len+seq_len])
-    if not sequential:    
+    if not sequential:
         random.shuffle(raw)
 
     train_size = int(time_len * split_ratio)
@@ -48,9 +48,9 @@ def generate_dataset(data, seq_len, pre_len, time_len=None, split_ratio=0.8, nor
     return train_X, train_Y, val_X, val_Y
 
 
-def generate_torch_datasets(data, seq_len, pre_len, time_len=None, split_ratio=0.8, normalize=True,sequential=False):
+def generate_torch_datasets(data, seq_len, pre_len, time_len=None, split_ratio=0.8, normalize=True, sequential=False):
     train_X, train_Y, test_X, test_Y = generate_dataset(data, seq_len, pre_len, time_len=time_len,
-                                                        split_ratio=split_ratio, normalize=normalize,sequential=sequential)
+                                                        split_ratio=split_ratio, normalize=normalize, sequential=sequential)
     train_dataset = torch.utils.data.TensorDataset(
         torch.FloatTensor(train_X), torch.FloatTensor(train_Y))
     test_dataset = torch.utils.data.TensorDataset(

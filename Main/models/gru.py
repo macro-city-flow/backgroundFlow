@@ -22,9 +22,9 @@ class GRU(nn.Module):
         self._U_z1 = nn.Parameter(torch.FloatTensor(
             1, self._hidden_dim))
         self._W_z2 = nn.Parameter(torch.FloatTensor(
-            self._feature_dim,1))
+            self._feature_dim, 1))
         self._U_z2 = nn.Parameter(torch.FloatTensor(
-            self._feature_dim,1))
+            self._feature_dim, 1))
         self._W_r = nn.Parameter(torch.FloatTensor(
             self._hidden_dim, self._input_dim))
         self._U_r = nn.Parameter(torch.FloatTensor(
@@ -60,7 +60,8 @@ class GRU(nn.Module):
         return
 
     def forward(self, inputs):
-        z_t = self._sigmoid(self._W_z1 @ inputs @ self._W_z2 + self._U_z1 @ self._H @ self._U_z2)
+        z_t = self._sigmoid(self._W_z1 @ inputs @ self._W_z2 +
+                            self._U_z1 @ self._H @ self._U_z2)
         r_t = self._sigmoid(self._W_r @ inputs + self._U_r @ self._H)
         _ = self._tanh(self._W_h @ inputs + r_t * (self._U_h @ self._H))
         #H = self._fr*self._H+(1-self._fr)*_
@@ -68,18 +69,18 @@ class GRU(nn.Module):
         self._H = H.detach()
         prediction = self._sigmoid(self._W @ H)
         return prediction
-        #Seems that the forget gate z_t is not very important here
+        # Seems that the forget gate z_t is not very important here
 
     @staticmethod
     def add_model_specific_arguments(parent_parser):
         parser = argparse.ArgumentParser(
             parents=[parent_parser], add_help=False)
-        parser.add_argument('--input-dim',type=int)
+        parser.add_argument('--input-dim', type=int)
         parser.add_argument('--output-dim', type=int)
         parser.add_argument('--hidden-dim', type=int, default=64)
-        parser.add_argument('--feature-dim',type=int)
+        parser.add_argument('--feature-dim', type=int)
         parser.add_argument('--fr', type=float, default=0.4)
-        parser.add_argument('--gradient-clip-val',type=float,default=5)
+        parser.add_argument('--gradient-clip-val', type=float, default=5)
         return parser
 
     @property
