@@ -13,15 +13,16 @@ def format_logger(logger, format='\033[31m[%(asctime)s %(levelname)s]\033\n[0m%(
     handler = logger.handlers[0]
     formatter = logging.Formatter(format)
     handler.setFormatter(formatter)
+    return
 
 
 def main(args):
 
     rank_zero_info(vars(args))
+
     dm = getattr(utils.data, temp_args.data_module +
                  'DataModule')(**vars(args))
 
-    #model = get_model(args, dm)
     model = getattr(models, args.model_name)(**vars(args))
 
     task = getattr(tasks, args.settings + 'Task')(model=model, feat_max_val=dm.feat_max_val,
@@ -65,5 +66,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     format_logger(pl._logger)
-    
+
     main(args)
