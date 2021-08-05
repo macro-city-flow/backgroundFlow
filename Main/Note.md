@@ -5,6 +5,9 @@
 3. Consider add more hidden state for it
 4. MDN can't convergent without recurrent unit
 5. In old metrics GRU_MDN performed well.
+6. I have to realize some SOTA model and compare my model with them.
+7. Colight running downstream task is needed. 
 
 New metrics:Relative Confidence Interval (RCI)
 New metrics:Relative Mean Confidence Interval (RMCI)
+A new metrics waiting to construct:Varity.
