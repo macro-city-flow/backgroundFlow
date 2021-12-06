@@ -13,7 +13,6 @@ class GRU(nn.Module):
         self._input_dim = input_dim
         self._hidden_dim = hidden_dim
         self._output_dim = output_dim
-        assert(0 <= fr <= 1)
         self._fr = fr
         self._tanh = nn.Tanh()
         self._sigmoid = nn.Sigmoid()

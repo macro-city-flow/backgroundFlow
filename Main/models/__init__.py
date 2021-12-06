@@ -6,6 +6,7 @@ from models.mdn import MDN
 from models.mdn2 import MDN2
 from models.gru_mdn import GRU_MDN
 from models.gru_mdn2 import GRU_MDN2
+from ConvLSTM import ConvLSTM
 __all__ = [
     'GCN',
     'GRU',
@@ -14,5 +15,6 @@ __all__ = [
     'MDN',
     'MDN2',
     'GRU_MDN',
-    'GRU_MDN2'
+    'GRU_MDN2',
+    'ConvLSTM'
 ]
