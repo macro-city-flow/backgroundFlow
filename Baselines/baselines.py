@@ -7,7 +7,9 @@ import numpy.linalg as la
 from numpy import max
 import math
 from sklearn.svm import SVR
+
 from statsmodels.tsa.arima.model import ARIMA
+from statsmodels.tsa.statespace.sarimax import SARIMAX
 from statsmodels.tsa.seasonal import seasonal_decompose
 from xgboost import train as xgb_train,DMatrix
 from tqdm import trange
@@ -52,7 +54,7 @@ pre_len = 1
 
 trainX,trainY,testX,testY = preprocess_data(data, time_len, train_rate, seq_len, pre_len)
 ####HA, SVR , ARIMA, SARIMA or xgboost
-method = 'SVR' 
+method = 'SARIMA' 
 ########### HA #############
 if method == 'HA':
     result = []
@@ -110,55 +112,57 @@ if method == 'SVR':
           'SVR_mape:%r'%mape,
             )
 
-######## XGBoost #########
-
-if method == 'xgboost':
-    params = {
-        'verbosity':2,
-        'objective':'reg:squarederror',
-        'feature_selector':'thrifty',
-        'booster':'gblinear',
-        'top_k':10
-    }
-    for _ in trange(25):
-        ...
-    # TODO trans the data into xhboost accepted way
-    # TODO fit
-    # TODO give prediction and evaluate
-    
 ######## ARIMA #########    
 if method == 'ARIMA':
-    rng = pd.date_range('1/11/2016', periods=5664, freq='15min')
-    a1 = pd.DatetimeIndex(rng)
-    data.index = a1
-    num = data.shape[1]   
-    rmse,mae,acc,r2,var,pred,ori = [],[],[],[],[],[],[]
-    for i in range(156):
-        ts = data.iloc[:,i]
-        ts_log=np.log(ts)    
-        ts_log=np.array(ts_log,dtype=np.float)
-        where_are_inf = np.isinf(ts_log)
-        ts_log[where_are_inf] = 0
-        ts_log = pd.Series(ts_log)
-        ts_log.index = a1
-        model = ARIMA(ts_log,order=[1,0,0])
-        properModel = model.fit()
-        predict_ts = properModel.predict(4, dynamic=True)
-        log_recover = np.exp(predict_ts)
-        ts = ts[log_recover.index]
-        er_rmse,er_mae,er_acc,r2_score,var_score = evaluation(ts,log_recover)
-        rmse.append(er_rmse)
-        mae.append(er_mae)
-        acc.append(er_acc)
-        r2.append(r2_score)
-        var.append(var_score)
-    print('arima_rmse:%r'%(np.mean(rmse)),
-          'arima_mse:%r'%(np.mean(mae)),
-          'arima_acc:%r'%(np.mean(acc1)),
-          'arima_r2:%r'%(np.mean(r2)),
-          'arima_var:%r'%(np.mean(var)))
+    result = []
+    truth = []
+    for _ in trange(625):
+        observed = data[:,_]
+        observed = observed[0:int(2880*train_rate)]
+        future = data[:,_]
+        future = future[int(2880*train_rate):]
+        model = ARIMA(observed,order=(1,1,6))
+        res = model.fit()
+        pred = res.predict()[:len(future)]
+        result.append(pred)
+        truth.append(future)
+    result = np.array(result)
+    result = np.transpose(result)
+    truth = np.array(truth)
+    truth = np.transpose(truth)
+    rmse,mse,mae,mape = evaluation(truth, result)
+    print('ARIMA_rmse:%r'%rmse,
+          'ARIMA_mse:%r'%mse,
+          'ARIMA_mae:%r'%mae,
+          'ARIMA_mape:%r'%mape,
+            )
 
 
 if method == 'SARIMA':
-    ...
+    result = []
+    truth = []
+    for _ in trange(625):
+        observed = data[:,_]
+        observed = observed[0:int(2880*train_rate)]
+        future = data[:,_]
+        future = future[int(2880*train_rate):]
+        mod = SARIMAX(observed, 
+                                order=(1,1,4), 
+                                seasonal_order=(0,1,1,24),   
+                                enforce_stationarity=False,
+                                enforce_invertibility=False)
+        res = mod.fit()
+        pred = res.predict()[:len(future)]
+        result.append(pred)
+        truth.append(future)
+    result = np.array(result)
+    result = np.transpose(result)
+    truth = np.array(truth)
+    truth = np.transpose(truth)
+    rmse,mse,mae,mape = evaluation(truth, result)
+    print('SARIMA_rmse:%r'%rmse,
+          'SARIMA_mse:%r'%mse,
+          'SARIMA_mae:%r'%mae,
+          'SARIMA_mape:%r'%mape,
+            )
 
