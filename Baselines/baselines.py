@@ -1,17 +1,24 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
+from pickle import load
 import numpy as np
 from sklearn.metrics import mean_squared_error,mean_absolute_error
 import numpy.linalg as la
+from numpy import max
 import math
 from sklearn.svm import SVR
-from statsmodels.tsa.arima_model import ARIMA
+from statsmodels.tsa.arima.model import ARIMA
+from statsmodels.tsa.seasonal import seasonal_decompose
+from xgboost import train as xgb_train,DMatrix
+from tqdm import trange
+
+def MAPE(true,pred):
+    return mean_absolute_error(true,pred)/max(true)*100
 
 def preprocess_data(data, time_len, rate, seq_len, pre_len):
-    data1 = np.mat(data)
     train_size = int(time_len * rate)
-    train_data = data1[0:train_size]
-    test_data = data1[train_size:time_len]
+    train_data = data[0:train_size]
+    test_data = data[train_size:time_len]
     
     trainX, trainY, testX, testY = [], [], [], []
     for i in range(len(train_data) - seq_len - pre_len):
@@ -26,24 +33,26 @@ def preprocess_data(data, time_len, rate, seq_len, pre_len):
     
 ###### evaluation ######
 def evaluation(a,b):
-    rmse = math.sqrt(mean_squared_error(a,b))
+    mse = mean_squared_error(a,b)
+    rmse = math.sqrt(mse)
     mae = mean_absolute_error(a, b)
-    F_norm = la.norm(a-b)/la.norm(a)
-    r2 = 1-((a-b)**2).sum()/((a-a.mean())**2).sum()
-    var = 1-(np.var(a - b))/np.var(a)
-    return rmse, mae, 1-F_norm, r2, var
+    mape = MAPE(a,b)
+
+    return rmse,mse,mae,mape
  
-path = r'data/los_speed.csv'
-data = pd.read_csv(path)
+path = r'chengdu_data.pkl'
+with open(path,'rb') as f:
+    data =  load(f)
 
+data = data.reshape(-1,625)
 time_len = data.shape[0]
-num_nodes = data.shape[1]
 train_rate = 0.8
-seq_len = 12
-pre_len = 3
-trainX,trainY,testX,testY = preprocess_data(data, time_len, train_rate, seq_len, pre_len)
-method = 'HA' ####HA or SVR or ARIMA
+seq_len = 4
+pre_len = 1
 
+trainX,trainY,testX,testY = preprocess_data(data, time_len, train_rate, seq_len, pre_len)
+####HA, SVR , ARIMA, SARIMA or xgboost
+method = 'SVR' 
 ########### HA #############
 if method == 'HA':
     result = []
@@ -52,21 +61,20 @@ if method == 'HA':
         a1 = np.mean(a, axis=0) 
         result.append(a1)
     result1 = np.array(result)
-    result1 = np.reshape(result1, [-1,num_nodes])
+    result1 = np.reshape(result1, [-1,625])
     testY1 = np.array(testY)
-    testY1 = np.reshape(testY1, [-1,num_nodes])
-    rmse, mae, accuracy,r2,var = evaluation(testY1, result1)  
-    print('HA_rmse:%r'%rmse,
-          'HA_mae:%r'%mae,
-          'HA_acc:%r'%accuracy,
-          'HA_r2:%r'%r2,
-          'HA_var:%r'%var)
+    testY1 = np.reshape(testY1, [-1,625])
+    rmse,mse, mae, mape = evaluation(testY1, result1)  
+    print(  'HA_rmse:%r\n'%rmse,
+            'HA_mse:%r\n'%mse,
+            'HA_mae:%r\n'%mae,
+            'HA_mape:%r\n'%rmse,)
 
 
 ############ SVR #############
 if method == 'SVR':  
     total_rmse, total_mae, total_acc, result = [], [],[],[]
-    for i in range(num_nodes):
+    for i in trange(625):
         data1 = np.mat(data)
         a = data1[:,i]
         a_X, a_Y, t_X, t_Y = preprocess_data(a, time_len, train_rate, seq_len, pre_len)
@@ -87,24 +95,40 @@ if method == 'SVR':
         pre = pre.repeat(pre_len ,axis=1)
         result.append(pre)
     result1 = np.array(result)
-    result1 = np.reshape(result1, [num_nodes,-1])
+    result1 = np.reshape(result1, [625,-1])
     result1 = np.transpose(result1)
     testY1 = np.array(testY)
 
 
-    testY1 = np.reshape(testY1, [-1,num_nodes])
+    testY1 = np.reshape(testY1, [-1,625])
     total = np.mat(total_acc)
     total[total<0] = 0
-    rmse1, mae1, acc1,r2,var = evaluation(testY1, result1)
-    print('SVR_rmse:%r'%rmse1,
-          'SVR_mae:%r'%mae1,
-          'SVR_acc:%r'%acc1,
-          'SVR_r2:%r'%r2,
-          'SVR_var:%r'%var)
+    rmse,mse,mae,mape = evaluation(testY1, result1)
+    print('SVR_rmse:%r'%rmse,
+          'SVR_mse:%r'%mse,
+          'SVR_mae:%r'%mae,
+          'SVR_mape:%r'%mape,
+            )
 
-######## ARIMA #########
+######## XGBoost #########
+
+if method == 'xgboost':
+    params = {
+        'verbosity':2,
+        'objective':'reg:squarederror',
+        'feature_selector':'thrifty',
+        'booster':'gblinear',
+        'top_k':10
+    }
+    for _ in trange(25):
+        ...
+    # TODO trans the data into xhboost accepted way
+    # TODO fit
+    # TODO give prediction and evaluate
+    
+######## ARIMA #########    
 if method == 'ARIMA':
-    rng = pd.date_range('1/3/2012', periods=5664, freq='15min')
+    rng = pd.date_range('1/11/2016', periods=5664, freq='15min')
     a1 = pd.DatetimeIndex(rng)
     data.index = a1
     num = data.shape[1]   
@@ -128,30 +152,13 @@ if method == 'ARIMA':
         acc.append(er_acc)
         r2.append(r2_score)
         var.append(var_score)
-#    for i in range(109,num):
-#        ts = data.iloc[:,i]
-#        ts_log=np.log(ts)    
-#        ts_log=np.array(ts_log,dtype=np.float)
-#        where_are_inf = np.isinf(ts_log)
-#        ts_log[where_are_inf] = 0
-#        ts_log = pd.Series(ts_log)
-#        ts_log.index = a1
-#        model = ARIMA(ts_log,order=[1,1,1])
-#        properModel = model.fit(disp=-1, method='css')
-#        predict_ts = properModel.predict(2, dynamic=True)
-#        log_recover = np.exp(predict_ts)
-#        ts = ts[log_recover.index]
-#        er_rmse,er_mae,er_acc,r2_score,var_score = evaluation(ts,log_recover)
-#        rmse.append(er_rmse)
-#        mae.append(er_mae)
-#        acc.append(er_acc)  
-#        r2.append(r2_score)
-#        var.append(var_score)
-    acc1 = np.mat(acc)
-    acc1[acc1 < 0] = 0
     print('arima_rmse:%r'%(np.mean(rmse)),
-          'arima_mae:%r'%(np.mean(mae)),
+          'arima_mse:%r'%(np.mean(mae)),
           'arima_acc:%r'%(np.mean(acc1)),
           'arima_r2:%r'%(np.mean(r2)),
           'arima_var:%r'%(np.mean(var)))
-  
+
+
+if method == 'SARIMA':
+    ...
+
